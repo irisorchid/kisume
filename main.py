@@ -1,18 +1,26 @@
 import os
-import discord
-from discord.ext import commands
+import asyncio
 
+import discord
+
+from discord.ext import commands
 from dotenv import load_dotenv
 
-#dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(verbose=True)
+discord_token = os.getenv('discord_token')
 
-discord_bot_token = os.getenv('discord_bot_token')
+bot = commands.Bot(command_prefix = '!')
 
-client = commands.Bot(command_prefix = '.')
-
-@client.event
+@bot.event
 async def on_ready():
     print('Hello World')
     
-client.run(discord_bot_token)
+#@bot.event
+#async def on_message():
+    #do nothing
+    
+@bot.command()
+async def hello(ctx):
+    await ctx.send('Hello World')
+    
+bot.run(discord_token)
