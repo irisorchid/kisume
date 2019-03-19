@@ -10,8 +10,11 @@ load_dotenv(verbose=True)
 discord_token = os.getenv('discord_token')
 discord_channel_id = os.getenv('discord_channel_id') #for channel specific stuff
 
-#TODO: function for command prefix := f(bot, message) for other prefixes?
-bot = commands.Bot(command_prefix = commands.when_mentioned_or('!'))
+#TODO:
+def prefix(bot, message):
+    return '!'
+
+bot = commands.Bot(command_prefix=prefix)
 
 @bot.event
 async def on_ready():
