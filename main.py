@@ -7,6 +7,8 @@ import websockets
 from discord.ext import commands
 from dotenv import load_dotenv
 
+import showdown
+
 load_dotenv(verbose=True)
 discord_token = os.getenv('discord_token')
 discord_channel_id = os.getenv('discord_channel_id') #for channel specific stuff
