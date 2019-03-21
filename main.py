@@ -11,10 +11,10 @@ discord_token = os.getenv('discord_token')
 discord_channel_id = os.getenv('discord_channel_id') #for channel specific stuff
 
 #TODO:
-def prefix(bot, message):
+def dynamic_prefix(bot, message):
     return '!'
 
-bot = commands.Bot(command_prefix=prefix)
+bot = commands.Bot(command_prefix='!')
 
 @bot.event
 async def on_ready():
