@@ -35,7 +35,8 @@ async def hello(ctx):
 @bot.command(name='foo')
 async def _foo(ctx):
     await ctx.send('foobar')
-    
+
+"""
 async def lel():
     greeting = ''
     async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as websocket:
@@ -43,7 +44,8 @@ async def lel():
         greeting = await websocket.recv()
         
     return greeting
-    
+"""
+
 @bot.command()
 async def showdown(ctx):
     await ctx.send('XD')
