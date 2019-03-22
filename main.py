@@ -18,6 +18,7 @@ def dynamic_prefix(bot, message):
     return '!'
 
 bot = commands.Bot(command_prefix='!')
+instance = showdown.Showdown(os.getenv('showdown_username'), os.getenv('showdown_password'))
 
 @bot.event
 async def on_ready():
@@ -46,8 +47,13 @@ async def lel():
     return greeting
 """
 
+@bot.command(name='showdown')
+async def pokemon(ctx):
+    await instance.run_timeout_instance(ctx)
+    
 @bot.command()
-async def showdown(ctx):
-    await ctx.send('XD')
+async def test2(ctx):
+    #TODO: test to see if instance is blocked by run instance
+    await instance.test(ctx)
     
 bot.run(discord_token)
