@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 #load_dotenv(verbose=True)
 
 #lets try class based approach
+#eventually change this into async class instead of 1 function does all
 
 #not very "thread safe or exception safe" yet xd
 
@@ -23,11 +24,11 @@ class Showdown:
         self.id = id
         self.pw = pw
         self.timeout = timeout
-        
+    
     async def connect():
         print('connect')
         
-    async def login():
+    async def login(r):
         login_predicate = '|/trn ' + self.id + ',0,'
         
         async with aiohttp.ClientSession() as session:
@@ -44,5 +45,15 @@ class Showdown:
             
         
     #how to implement callbacks maybe?
-    def on_message():
-        print('foobar')
+    async def handle_response(ws, r):
+        action = r[1]
+        switch = {}
+        #switch on action?
+        
+            
+    async def run_timeout_instance():
+        await with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as ws:
+            async for response in ws:
+                #handle r
+                await handle_response(ws, response.split('|'))
+        
