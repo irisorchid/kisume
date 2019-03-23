@@ -27,9 +27,6 @@ class Showdown:
     
     async def test(self, ctx):
         await ctx.send('test2')
-    
-    async def connect(self):
-        print('connect')
         
     async def login(self, r):
         login_predicate = '|/trn ' + self.id + ',0,'
@@ -42,25 +39,25 @@ class Showdown:
             data['pass'] = self.pw
             data['challstr'] = r[2] + '|' + r[3]
             
+            #assume no errors here (bad idea)
             async with session.post(url, data=data) as resp:
                 r = json.loads((await resp.text())[1:])
                 login_predicate += r['assertion']
         
         return login_predicate
         
-    #how to implement callbacks maybe?
     async def handle_response(self, ws, r):
         response_type = r[1]
         #switch = {}
-        #TODO: switch on response -> function mapping?
+        #make this better later
         if response_type == 'challstr':
             #assume not logged on yet
             msg = await self.login(r)
             await ws.send(msg)
-        
             
     async def run_timeout_instance(self, ctx):
         async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as ws:
+            #might raise connectionclosed error
             async for response in ws:
                 await self.handle_response(ws, response.split('|'))
                 print(response)

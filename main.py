@@ -50,10 +50,10 @@ async def lel():
 @bot.command(name='showdown')
 async def pokemon(ctx):
     await instance.run_timeout_instance(ctx)
+    #await here shouldn't run until instance times out
     
 @bot.command()
 async def test2(ctx):
-    #TODO: test to see if instance is blocked by run instance
     await instance.test(ctx)
     
 bot.run(discord_token)
