@@ -61,4 +61,10 @@ async def kusoge(ctx):
     #cleanup maybe? instance.close()
     await bot.logout()
     
+@bot.command(name='unravel')
+async def getinfo(ctx):
+    #print stuff about server
+    print(ctx.message.content)
+    print(ctx.channel)
+    
 bot.run(discord_token)
