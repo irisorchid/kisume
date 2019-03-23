@@ -56,4 +56,9 @@ async def pokemon(ctx):
 async def test2(ctx):
     await instance.test(ctx)
     
+@bot.command()
+async def kusoge(ctx):
+    #cleanup maybe? instance.close()
+    await bot.logout()
+    
 bot.run(discord_token)
