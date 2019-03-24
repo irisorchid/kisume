@@ -17,17 +17,18 @@ from dotenv import load_dotenv
 class Showdown:
 
     #timeout = logoff after X seconds?
-    def __init__(self, id, pw, timeout=3600):
+    #ai = if true make bot play, if false users play
+    def __init__(self, id, pw, timeout=3600, ai=False):
         self.id = id
         self.pw = pw
         self.timeout = timeout
+        self.ai = ai
     
     async def test(self, ctx):
         await ctx.send('test2')
         
     async def pick_avatar(self, ws):
         await ws.send('|/avatar 27')
-        # maid grill pls
         
     async def login(self, r):
         login_predicate = '|/trn ' + self.id + ',0,'

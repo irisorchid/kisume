@@ -51,6 +51,14 @@ async def lel():
 async def pokemon(ctx):
     await instance.run_timeout_instance(ctx)
     #await here shouldn't run until instance times out
+    print('showdown end test')
+    await ctx.send('showdown end test')
+
+@bot.command(name='unravel')
+async def test(ctx):
+    #print stuff about server
+    print(ctx.message.content)
+    print(ctx.channel)
     
 @bot.command()
 async def test2(ctx):
@@ -60,11 +68,5 @@ async def test2(ctx):
 async def kusoge(ctx):
     #cleanup maybe? instance.close()
     await bot.logout()
-    
-@bot.command(name='unravel')
-async def getinfo(ctx):
-    #print stuff about server
-    print(ctx.message.content)
-    print(ctx.channel)
     
 bot.run(discord_token)
