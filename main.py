@@ -37,15 +37,14 @@ async def hello(ctx):
 async def _foo(ctx):
     await ctx.send('foobar')
 
-"""
-async def lel():
-    greeting = ''
-    async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as websocket:
-        await websocket.send('hello')
-        greeting = await websocket.recv()
-        
-    return greeting
-"""
+@bot.command()
+async def echo(ctx, *, content:str):
+    await ctx.send(content)
+    
+@bot.command()
+async def choose(ctx, *, content:str):
+    pick_one = [x.strip() for x in content.split(',')]
+    await ctx.send(pick_one[random.randrange(len(pick_one)))
 
 @bot.command(name='showdown')
 async def pokemon(ctx):
