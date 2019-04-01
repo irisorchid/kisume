@@ -1,5 +1,6 @@
 import os
 import asyncio
+import random
 
 import discord
 import websockets
@@ -20,22 +21,37 @@ def dynamic_prefix(bot, message):
 bot = commands.Bot(command_prefix='!')
 instance = showdown.Showdown(os.getenv('showdown_username'), os.getenv('showdown_password'))
 
+
+def load_commands(outbot):
+    @outbot.command()
+    async def hello2(ctx):
+        await ctx.send('hello2')
+            
+class FOOBAR:
+    
+    def __init__(self, bot):
+        self.bot = bot
+        load_commands(self.bot)
+    
+
+FOOBAR(bot)
+        
+print(showdown.bot2)
+
 @bot.event
 async def on_ready():
     print('Hello World')
-    
-#@bot.event
-#async def on_message():
-    #do nothing
+
+"""
+@bot.event
+async def on_message(message):
+    if message.content.startswith('!echo'):
+        print('ldkasfhkjhfjkas')
+"""
     
 @bot.command()
 async def hello(ctx):
-    #print(ctx.message.channel.id)
     await ctx.send('Hello World')
-    
-@bot.command(name='foo')
-async def _foo(ctx):
-    await ctx.send('foobar')
 
 @bot.command()
 async def echo(ctx, *, content:str):
@@ -43,9 +59,12 @@ async def echo(ctx, *, content:str):
     
 @bot.command()
 async def choose(ctx, *, content:str):
-    pick_one = [x.strip() for x in content.split(',')]
-    await ctx.send(pick_one[random.randrange(len(pick_one)))
-
+    pick_one = [x.strip() for x in content.split(',') if x.strip() != '']
+    choices = len(pick_one)
+    if (choices == 0):
+        return
+    await ctx.send(pick_one[random.randrange(choices)])
+    
 @bot.command(name='showdown')
 async def pokemon(ctx):
     await instance.run_timeout_instance(ctx)
@@ -57,11 +76,15 @@ async def pokemon(ctx):
 async def test(ctx):
     #print stuff about server
     print(ctx.message.content)
-    print(ctx.channel)
+    print(ctx.channel)    
     
 @bot.command()
 async def test2(ctx):
     await instance.test(ctx)
+    
+@bot.command()
+async def switch(ctx, *, content:str):
+    await instance.switch(content)
     
 @bot.command()
 async def kusoge(ctx):
