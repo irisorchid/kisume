@@ -1,11 +1,8 @@
 def load_commands(bot, showdown):
     
-    # @bot.command()
-    # async def sdctest(ctx):
-        # await ctx.send('hello')
-    
-    @bot.command(name='showdown2')
+    @bot.command(name='showdown')
     async def pokemon(ctx):
+        #bot.loop.create_task #timeout task
         await showdown.run_timeout_instance(ctx)
         
     

@@ -25,31 +25,20 @@ bot = commands.Bot(command_prefix='!')
 instance = showdown.Showdown(bot, os.getenv('showdown_username'), os.getenv('showdown_password'))
 
 #make modules struct with all the modules and pass to main commands
+main_commands.load_commands(bot)
 
 @bot.event
 async def on_ready():
-    print('Hello World')
+    print('bot is running!')
 
-"""
-@bot.event
-async def on_message(message):
-    if message.content.startswith('!echo'):
-        print('ldkasfhkjhfjkas')
-"""
-@bot.command(name='showdown')
-async def pokemon(ctx):
-    food.bot_time = time.time()
-    #bot.loop.create_task(back())
-    await instance.run_timeout_instance(ctx)
-    #await here shouldn't run until instance times out
-    print('showdown end test')
-    await ctx.send('showdown end test')
+# @bot.event
+# async def on_message(message):
+    # if message.content.startswith('!echo'):
+        # print('ldkasfhkjhfjkas')
     
 @bot.command()
 async def switch(ctx, *, content:str):
     food.bot_time = time.time()
     await instance.switch(content)
-    
-main_commands.load_commands(bot)
     
 bot.run(discord_token)
