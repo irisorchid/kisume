@@ -1,6 +1,7 @@
 import os
 import asyncio
 import json
+import time
 
 import aiohttp
 import websockets
@@ -20,7 +21,7 @@ class Showdown:
 
     #timeout = logoff after X seconds?
     #ai = if true make bot play, if false users play
-    def __init__(self, id, pw, timeout=3600, ai=False):
+    def __init__(self, bot, id, pw, ai=False, timeout=3600):
         self.id = id
         self.pw = pw
         self.timeout = timeout
@@ -68,12 +69,13 @@ class Showdown:
     async def switch(self, num):
         await self.ws.send(self.room + '|/choose switch ' + num)
     
+    async def handle_battle: pass
+    
     async def handle_response(self, ws, r, room):
         if len(r) == 1:
             return
         response_type = r[1]
         #switch = {}
-        
         """
         elif response_type == 'updatesearch':
             dict = json.loads(r[2])
@@ -95,21 +97,25 @@ class Showdown:
             await ws.send(room + '|/choose move 1')
         else:
             return
-            
+    
     async def run_timeout_instance(self, ctx):
-        async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as ws:
-            #might raise connectionclosed error
-            self.ws = ws
-            async for response in ws:
+        if self.ws is not None:
+            return
+            
+        async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as self.ws:
+            #handle connectionclosed error
+            async for response in self.ws:
                 #print(response + ' ENDRESPONSE')
-                room = response.split('|')[0][1:].rstrip()
+                #lobby responses always start with >
+                if response[0] == '>':
+                    room = response.split('|')[0][1:].rstrip()
                 self.room = room
+                """
                 for line in response.split('\n'):
                     print(line + ' ENDLINE')
-                    await self.handle_response(ws, line.split('|'), room)
-                    
-                #await ctx.send('xd')
+                    await self.handle_response(self.ws, line.split('|'), room)
+                    """
                
     async def close():
-        print('t')
-        
+        self.ws.close()
+    

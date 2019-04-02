@@ -1,6 +1,7 @@
 import os
 import asyncio
 import random
+import time
 
 import discord
 import websockets
@@ -19,7 +20,8 @@ def dynamic_prefix(bot, message):
     return '!'
 
 bot = commands.Bot(command_prefix='!')
-instance = showdown.Showdown(os.getenv('showdown_username'), os.getenv('showdown_password'))
+
+instance = showdown.Showdown(bot, os.getenv('showdown_username'), os.getenv('showdown_password'))
 
 
 def load_commands(outbot):
@@ -31,10 +33,12 @@ class FOOBAR:
     
     def __init__(self, bot):
         self.bot = bot
+        self.timer = 10
+        self.bot_time = 0
         load_commands(self.bot)
     
 
-FOOBAR(bot)
+food = FOOBAR(bot)
         
 print(showdown.bot2)
 
@@ -48,6 +52,14 @@ async def on_message(message):
     if message.content.startswith('!echo'):
         print('ldkasfhkjhfjkas')
 """
+async def back(food):
+    await asyncio.sleep(food.timer)
+    food.timer = time.time() - food.bot_time
+    if food.timer >= 10:
+        print('TIMEOUT')
+    else:
+        food.timer = 10 - food.timer
+        print(food.timer)
     
 @bot.command()
 async def hello(ctx):
@@ -67,6 +79,8 @@ async def choose(ctx, *, content:str):
     
 @bot.command(name='showdown')
 async def pokemon(ctx):
+    food.bot_time = time.time()
+    #bot.loop.create_task(back())
     await instance.run_timeout_instance(ctx)
     #await here shouldn't run until instance times out
     print('showdown end test')
@@ -84,6 +98,7 @@ async def test2(ctx):
     
 @bot.command()
 async def switch(ctx, *, content:str):
+    food.bot_time = time.time()
     await instance.switch(content)
     
 @bot.command()
