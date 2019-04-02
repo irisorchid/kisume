@@ -6,28 +6,41 @@ import time
 import aiohttp
 import websockets
 
-from dotenv import load_dotenv
+import showdown_commands
 
 #load_dotenv(verbose=True)
 
-#lets try class based approach
-#eventually change this into async class instead of 1 function does all maybe
-
 #not very "thread safe or exception safe" yet xd
-
-bot2 = "d"
 
 class Showdown:
 
     #timeout = logoff after X seconds?
     #ai = if true make bot play, if false users play
     def __init__(self, bot, id, pw, ai=False, timeout=3600):
+        self.bot = bot
         self.id = id
         self.pw = pw
-        self.timeout = timeout
         self.ai = ai
-        #self.battles = set()
+        self.timeout = timeout
         
+        self.ws = None
+        self.timer = self.timeout
+        self.bot_time = 0
+        
+        showdown_commands.load_commands(self.bot, self)
+    
+    def reset_time(self):
+        self.timer = self.timeout
+    
+    async def check_timeout(self):
+        while True:
+            await asyncio.sleep(self.timer)
+            self.timer = time.time() - self.bot_time
+            if self.timer >= self.timeout:
+                pass #timeout occurred #should return here
+            else:
+                self.timer = self.timeout - self.timer
+    
     async def test(self, ctx):
         await ctx.send('test2')
         
@@ -69,34 +82,57 @@ class Showdown:
     async def switch(self, num):
         await self.ws.send(self.room + '|/choose switch ' + num)
     
-    async def handle_battle: pass
+    #room responses always start with >ROOMID\n
+    async def handle_battle_response(self, response, room):
+        pass
     
-    async def handle_response(self, ws, r, room):
-        if len(r) == 1:
-            return
-        response_type = r[1]
-        #switch = {}
-        """
-        elif response_type == 'updatesearch':
-            dict = json.loads(r[2])
-            if dict['games'] is not None:
-                for game, format in dict.items():
-                    self.battles.add(game)"""
-        #print('command is:' + response_type)
-        if response_type == 'challstr':
-            #assume not logged on yet
-            msg = await self.login(r)
-            await ws.send(msg)
-            await self.pick_avatar(ws)
-        elif response_type == 'updatechallenges':
-            await self.handle_challenge(ws, r)
-            #print(r[2])
-            #print(json.loads(r[2])['challengesFrom'])
-        elif response_type == 'turn':
-            print(room + ' HELLODISCORD')
-            await ws.send(room + '|/choose move 1')
+    #lobby / global responses
+    async def handle_global_response(self, response):
+        r = response.split('|')
+        if len(r) == 1: return
+        
+        if r[1] == 'challstr':
+            pass
+        elif r[1] == 'updatechallenges':
+            pass
+        elif r[1] == 'updatesearch':
+            pass
         else:
             return
+    
+    async def handle_response(self, response):
+        #battle room ?
+        if response[0] == '>':
+            pass
+        
+        #global messages have no ROOMID
+        self.handle_global_response(response)
+        
+        # if len(r) == 1:
+            # return
+        # response_type = r[1]
+        # #switch = {}
+        # """
+        # elif response_type == 'updatesearch':
+            # dict = json.loads(r[2])
+            # if dict['games'] is not None:
+                # for game, format in dict.items():
+                    # self.battles.add(game)"""
+        # #print('command is:' + response_type)
+        # if response_type == 'challstr':
+            # #assume not logged on yet
+            # msg = await self.login(r)
+            # await ws.send(msg)
+            # await self.pick_avatar(ws)
+        # elif response_type == 'updatechallenges':
+            # await self.handle_challenge(ws, r)
+            # #print(r[2])
+            # #print(json.loads(r[2])['challengesFrom'])
+        # elif response_type == 'turn':
+            # print(room + ' HELLODISCORD')
+            # await ws.send(room + '|/choose move 1')
+        # else:
+            # return
     
     async def run_timeout_instance(self, ctx):
         if self.ws is not None:
@@ -104,13 +140,17 @@ class Showdown:
             
         async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as self.ws:
             #handle connectionclosed error
+            #can also try:
+            #await asyncio.wait_for(ws.recv(), timeout=X)
             async for response in self.ws:
-                #print(response + ' ENDRESPONSE')
-                #lobby responses always start with >
+                self.handle_response(response)
+                
+                
+                """
                 if response[0] == '>':
                     room = response.split('|')[0][1:].rstrip()
                 self.room = room
-                """
+                
                 for line in response.split('\n'):
                     print(line + ' ENDLINE')
                     await self.handle_response(self.ws, line.split('|'), room)
