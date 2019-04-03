@@ -5,4 +5,5 @@ def load_commands(bot, showdown):
         #bot.loop.create_task #timeout task
         await showdown.run_timeout_instance(ctx)
         
-    
+    @bot.command()
+    async def switch(ctx):

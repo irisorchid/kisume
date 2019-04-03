@@ -1,3 +1,5 @@
+import random
+
 def load_commands(bot, modules=None):
     
     @bot.command()

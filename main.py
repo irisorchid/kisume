@@ -1,10 +1,7 @@
 import os
 import asyncio
-import random
-import time
 
 import discord
-import websockets
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -14,7 +11,8 @@ import main_commands
 
 load_dotenv(verbose=True)
 discord_token = os.getenv('discord_token')
-discord_channel_id = os.getenv('discord_channel_id') #for channel specific stuff
+
+# discord_channel_id = os.getenv('discord_channel_id') #for channel specific stuff
 
 #TODO:
 def dynamic_prefix(bot, message):
@@ -36,9 +34,5 @@ async def on_ready():
     # if message.content.startswith('!echo'):
         # print('ldkasfhkjhfjkas')
     
-@bot.command()
-async def switch(ctx, *, content:str):
-    food.bot_time = time.time()
-    await instance.switch(content)
     
 bot.run(discord_token)
