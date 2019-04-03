@@ -12,15 +12,11 @@ import main_commands
 load_dotenv(verbose=True)
 discord_token = os.getenv('discord_token')
 
-# discord_channel_id = os.getenv('discord_channel_id') #for channel specific stuff
-
-#TODO:
-def dynamic_prefix(bot, message):
-    return '!'
+discord_channel_id = int(os.getenv('discord_channel_id')) #for channel specific commands
 
 bot = commands.Bot(command_prefix='!')
 
-instance = showdown.Showdown(bot, os.getenv('showdown_username'), os.getenv('showdown_password'))
+instance = showdown.Showdown(bot, os.getenv('showdown_username'), os.getenv('showdown_password'), discord_channel_id)
 
 #make modules struct with all the modules and pass to main commands
 main_commands.load_commands(bot)

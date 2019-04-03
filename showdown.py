@@ -9,22 +9,28 @@ import showdown_commands
 
 class Showdown:
 
-    def __init__(self, bot, id, pw, ai=False, timeout=3600):
+    def __init__(self, bot, id, pw, channel_id, ai=False, timeout=3600):
         self.bot = bot
         self.id = id
         self.pw = pw
+        self.channel_id = channel_id
         self.ai = ai
         self.timeout = timeout
         
         self.ws = None
         self.timer = self.timeout
         self.bot_time = 0
+        self.ctx = None
+        self.rooms = {} #channel_id : room
         
         showdown_commands.load_commands(self.bot, self)
     
     def reset_time(self):
         self.timer = self.timeout
-    
+        
+    async def sendprint(self, msg):
+        await self.ws.send(msg)
+        
     async def check_timeout(self):
         while True:
             await asyncio.sleep(self.timer)
@@ -58,7 +64,7 @@ class Showdown:
         await self.ws.send('|/avatar 27')
         
     async def handle_challenge(self, r):
-        
+        # self.rooms[self.ctx.channel.id] = room
         dict = json.loads(r[2])
         for user, format in dict['challengesFrom'].items():
             if user == 'psikh0':
@@ -66,8 +72,8 @@ class Showdown:
                 await self.ws.send('|/accept psikh0')
         return        
     
-    async def switch(self, num):
-        await self.ws.send(self.room + '|/choose switch ' + num)
+    async def switch(self, room, target):
+        await self.ws.send(room + '|/choose switch ' + target)
     
     async def choice(self, choice, *args): pass
     
@@ -76,6 +82,8 @@ class Showdown:
     #room responses always start with >ROOMID\n
     async def handle_room_response(self, response):
         room = response.split('|')[0][1:].rstrip()
+        
+        #if enter, bind channel to room
     
     #lobby / global responses
     async def handle_global_response(self, response):
@@ -100,10 +108,12 @@ class Showdown:
         # elif response_type == 'turn':
             # await ws.send(room + '|/choose move 1')
     
+    #architecture problem: should create instance bound to channel
     async def run_timeout_instance(self, ctx):
         if self.ws is not None:
             return
-            
+        
+        self.ctx = ctx
         async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as self.ws:
             #handle connectionclosed error
             #can also try: await asyncio.wait_for(ws.recv(), timeout=X)

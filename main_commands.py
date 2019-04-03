@@ -1,5 +1,9 @@
 import random
 
+#TODO:
+def dynamic_prefix(bot, message):
+    return '!'
+
 def load_commands(bot, modules=None):
     
     @bot.command()
