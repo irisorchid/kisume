@@ -14,3 +14,7 @@ def load_commands(bot, showdown):
     async def switch(ctx, arg):
         #TODO: check valid arg
         await showdown.switch(showdown.rooms[ctx.channel.id], arg)
+        
+    @bot.command()
+    async def sclose(ctx):
+        await showdown.close()

@@ -115,12 +115,17 @@ class Showdown:
         
         self.ctx = ctx
         async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as self.ws:
-            #handle connectionclosed error
-            #can also try: await asyncio.wait_for(ws.recv(), timeout=X)
+            #TODO maybe: await asyncio.wait_for(ws.recv(), timeout=X)
             async for response in self.ws:
                 print(response + ' ENDRESPONSE')
                 await self.handle_response(response)
+
+            print("CONNECTION CLOSED 1")            
+        print("CONNECTION CLOSED 2")
+        return
                
-    async def close():
-        self.ws.close()
+    async def close(self):
+        if self.ws is not None:
+            await self.ws.close()
+        
     

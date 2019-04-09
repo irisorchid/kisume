@@ -3,8 +3,12 @@ import random
 #TODO:
 def dynamic_prefix(bot, message):
     return '!'
-
-def load_commands(bot, modules=None):
+# @bot.event
+# async def on_message(message):
+    # if message.content.startswith('!echo'):
+        # print('ldkasfhkjhfjkas')
+    
+def load_commands(bot, modules):
     
     @bot.command()
     async def hello(ctx):
@@ -29,4 +33,5 @@ def load_commands(bot, modules=None):
         
     @bot.command(name='kusoge')
     async def quit(ctx):
+        await modules.instance.close()
         await bot.logout()
