@@ -8,6 +8,8 @@ def dynamic_prefix(bot, message):
     # if message.content.startswith('!echo'):
         # print('ldkasfhkjhfjkas')
     
+function_list = []
+    
 def load_commands(bot, modules):
     
     @bot.command()
@@ -37,3 +39,19 @@ def load_commands(bot, modules):
             await i.close()
         #might want to sleep here
         await bot.logout()
+        
+    @bot.command(name='initiate_listener')
+    async def blackmagic(ctx):
+        
+        async def showdown_message(message):
+            if message.author != bot.user and message.channel == ctx.channel and not message.content.startswith('!'):
+                await ctx.send('multiply')
+        
+        function_list.append(showdown_message)
+        bot.add_listener(showdown_message, 'on_message')
+        
+    @bot.command(name='remove_all')
+    async def whitemagic(ctx):
+    
+        for f in function_list:
+            bot.remove_listener(f, 'on_message')

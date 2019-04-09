@@ -18,3 +18,8 @@ def load_commands(bot, showdown):
     @bot.command()
     async def sclose(ctx):
         await showdown.close()
+        
+    # @bot.listen('on_message')
+    # async def showdown_message(message):
+        # if message.author != bot.user and message.channel.name == 'bot-testing':
+            # await message.channel.send('black magic')

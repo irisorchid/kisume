@@ -17,18 +17,23 @@ class Showdown:
         self.ai = ai
         self.timeout = timeout
         
+        self.ctx = None
         self.ws = None
         self.timer = self.timeout
         self.bot_time = 0
-        self.ctx = None
         self.rooms = {} #channel_id : room
         
         showdown_commands.load_commands(self.bot, self)
     
     def reset_time(self):
         self.timer = self.timeout
-        
+    
+    async def close(self):
+        if self.ws is not None:
+            await self.ws.close()
+            
     async def sendprint(self, msg):
+        print(msg)
         await self.ws.send(msg)
         
     async def check_timeout(self):
@@ -108,7 +113,6 @@ class Showdown:
         # elif response_type == 'turn':
             # await ws.send(room + '|/choose move 1')
     
-    #architecture problem: should create instance bound to channel
     async def run_timeout_instance(self, ctx):
         if self.ws is not None:
             return
@@ -122,10 +126,5 @@ class Showdown:
 
             print("CONNECTION CLOSED 1")            
         print("CONNECTION CLOSED 2")
-        return
-               
-    async def close(self):
-        if self.ws is not None:
-            await self.ws.close()
         
     
