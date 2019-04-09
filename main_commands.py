@@ -33,5 +33,7 @@ def load_commands(bot, modules):
         
     @bot.command(name='kusoge')
     async def quit(ctx):
-        await modules.instance.close()
+        for i in modules:
+            await i.close()
+        #might want to sleep here
         await bot.logout()
