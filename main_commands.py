@@ -3,12 +3,10 @@ import random
 #TODO:
 def dynamic_prefix(bot, message):
     return '!'
-# @bot.event
-# async def on_message(message):
-    # if message.content.startswith('!echo'):
-        # print('ldkasfhkjhfjkas')
     
 function_list = []
+    
+#TODO: use named tuple for modules instead ?
     
 def load_commands(bot, modules):
     
@@ -40,6 +38,7 @@ def load_commands(bot, modules):
         #might want to sleep here
         await bot.logout()
         
+    """
     @bot.command(name='initiate_listener')
     async def blackmagic(ctx):
         
@@ -55,3 +54,4 @@ def load_commands(bot, modules):
     
         for f in function_list:
             bot.remove_listener(f, 'on_message')
+    """
