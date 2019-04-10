@@ -19,13 +19,14 @@ class Showdown:
         self.timeout = timeout
 
         self.ws = None
-        self.connected_started = False
         self.timer = self.timeout
         self.bot_time = 0
         
         self.listener = {}
         self.rooms = {}
+        
         self.ws_lock = asyncio.Lock()
+        self.ws_close_lock = asyncio.Lock()
         
         showdown_commands.load_commands(self.bot, self)
     
@@ -103,24 +104,25 @@ class Showdown:
             await self.handle_global_response(response)
     
     async def connect_with_timeout(self, ctx):
-        #TODO: lock here ? 
-        if self.ws is not None:
-            return
-        
-        #TODO maybe: await asyncio.wait_for(ws.recv(), timeout=X)
-        async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as self.ws:
-            try:
-                showdown_commands.load_showdown_commands(self.bot, self, ctx)
-                async for response in self.ws:
-                    print(response + ' ENDRESPONSE')
-                    await self.handle_response(response)
-            finally:
-                showdown_commands.unload_showdown_commands(self.bot, self, ctx)
-                
-            print("CONNECTION CLOSED 1")            
-        print("CONNECTION CLOSED 2")
+        async with self.ws_lock:
+            if self.ws is not None:
+                return
+            
+            #TODO maybe: await asyncio.wait_for(ws.recv(), timeout=X)
+            async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as self.ws:
+                try:
+                    showdown_commands.load_showdown_commands(self.bot, self, ctx)
+                    async for response in self.ws:
+                        print(response + ' ENDRESPONSE')
+                        await self.handle_response(response)
+                finally:
+                    showdown_commands.unload_showdown_commands(self.bot, self, ctx)
+                    
+                print("CONNECTION CLOSED 1")            
+            print("CONNECTION CLOSED 2")
+        print("FREEDOM")
     
     async def close(self):
-        #TODO: lock here too
-        if self.ws is not None:
-            await self.ws.close()
+        async with self.ws_close_lock:
+            if self.ws is not None:
+                await self.ws.close()

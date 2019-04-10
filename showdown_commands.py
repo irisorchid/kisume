@@ -3,14 +3,14 @@ def load_commands(bot, showdown):
     #restricts commands to channel_id
     def channel_restrict(f): pass
     
-    #TODO: bind to channel
     @bot.command(name='showdown')
     async def pokemon(ctx):
-        if ctx.channel.id != showdown.channel_id:
-            return
+        #very important right now
+        if ctx.channel.id != showdown.channel_id: return
+        
         #bot.loop.create_task #timeout task
         
-        #Critical, only run this once, check ws availability here? currrent stuff will break
+        #critical section
         await showdown.connect_with_timeout(ctx)
         
         #if showdown doesn't have listener
@@ -20,9 +20,9 @@ def load_commands(bot, showdown):
         #else, do nothing
         
     #should result gracefully with dynamic listener gone
-    # @bot.command()
-    # async def showdown_close(ctx):
-        # await showdown.close()
+    @bot.command()
+    async def showdown_close(ctx):
+        await showdown.close()
 
 def generate_showdown_commands(bot, showdown, ctx):
 
