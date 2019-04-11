@@ -7,26 +7,22 @@ import websockets
 
 import showdown_commands
 
-#maybe cache some of the ws responses
-
 class Showdown:
 
-    def __init__(self, bot, id, pw, channel_id, timeout=3600):
+    def __init__(self, bot, id, pw, channel_id, timeout=3600, ai=False):
         self.bot = bot
         self.id = id
         self.pw = pw
         self.channel_id = channel_id
         self.timeout = timeout
+        self.ai = ai
 
         self.ws = None
         self.timer = self.timeout
         self.bot_time = 0
-        
+        self.running = False
         self.listener = {}
         self.rooms = {}
-        
-        self.ws_lock = asyncio.Lock()
-        self.ws_close_lock = asyncio.Lock()
         
         showdown_commands.load_commands(self.bot, self)
     
@@ -73,17 +69,20 @@ class Showdown:
                 await self.ws.send('|/accept psikh0')
         return
     
+    #Q Up
+    async def queue(self): pass
+    
+    #let showdown handle target legality
     async def choose(self, room, command, target, option=''):
         await self.ws.send(room + '|/choose ' + command + ' ' + target + option)
     
     #room responses always start with >ROOMID\n
     async def handle_room_response(self, response):
-        room = response.split('|')[0][1:].rstrip()
+        room_id = response.split('|')[0][1:].rstrip()
         
         # elif response_type == 'turn':
             # await ws.send(room + '|/choose move 1')
     
-    #lobby / global responses
     async def handle_global_response(self, response):
         r = response.split('|')
         if len(r) == 1: return
@@ -104,25 +103,19 @@ class Showdown:
             await self.handle_global_response(response)
     
     async def connect_with_timeout(self, ctx):
-        async with self.ws_lock:
-            if self.ws is not None:
-                return
-            
-            #TODO maybe: await asyncio.wait_for(ws.recv(), timeout=X)
+        if self.ws is not None: return
+        #TODO maybe: await asyncio.wait_for(ws.recv(), timeout=X)
+        try:
             async with websockets.connect('ws://sim.smogon.com:8000/showdown/websocket') as self.ws:
-                try:
-                    showdown_commands.load_showdown_commands(self.bot, self, ctx)
-                    async for response in self.ws:
-                        print(response + ' ENDRESPONSE')
-                        await self.handle_response(response)
-                finally:
-                    showdown_commands.unload_showdown_commands(self.bot, self, ctx)
-                    
-                print("CONNECTION CLOSED 1")            
-            print("CONNECTION CLOSED 2")
-        print("FREEDOM")
+                showdown_commands.load_showdown_commands(self.bot, self, ctx)
+                async for response in self.ws:
+                    print(response + ' ENDRESPONSE')
+                    await self.handle_response(response)
+        finally:
+            self.ws = None
+            showdown_commands.unload_showdown_commands(self.bot, self, ctx)
     
     async def close(self):
-        async with self.ws_close_lock:
-            if self.ws is not None:
-                await self.ws.close()
+        if self.ws is None: return
+        ws_temp, self.ws = self.ws, None
+        await ws_temp.close()
