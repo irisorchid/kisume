@@ -21,8 +21,10 @@ class Showdown:
         self.timer = self.timeout
         self.bot_time = 0
         self.running = False
-        self.listener = {}
-        self.rooms = {}
+        
+        self.listener = {} #channel id : on_message function
+        self.rooms = {} #channel id : active room
+        self.channels = {} #active room : channel id
         
         showdown_commands.load_commands(self.bot, self)
     
@@ -78,29 +80,40 @@ class Showdown:
     
     #room responses always start with >ROOMID\n
     async def handle_room_response(self, response):
-        room_id = response.split('|')[0][1:].rstrip()
+        r = response.split('\n')
+        room_id = r[0][1:].rstrip()
         
-        # elif response_type == 'turn':
-            # await ws.send(room + '|/choose move 1')
+        for l in r[1:]:
+            line = l.split('|')
+            if len(line) <= 1: continue
+            
+            #if response type is request, compile information and wait for user input ?
+        return
     
     async def handle_global_response(self, response):
-        r = response.split('|')
-        if len(r) == 1: return
-        
-        if r[1] == 'challstr':
-            await self.login(r)
-        elif r[1] == 'updatechallenges':
-            await self.handle_challenge(r)
-        elif r[1] == 'updatesearch':
-            return
-        else:
-            return
+        r = response.split('\n')  
+        for l in r:
+            line = l.split('|')
+            if len(line) <= 1: continue
+            
+            response_type = line[1]
+            if response_type == 'challstr':
+                await self.login(line) #TODO: if not logged in
+            elif response_type == 'updatechallenges':
+                await self.handle_challenge(line)
+            elif response_type == 'updatesearch':
+                games = json.loads(line[2])['games']
+                #games can just be a json 'null'
+                #bind room / channel
+            else:
+                continue
+        return
     
     async def handle_response(self, response):
         if response[0] == '>':
-            await self.handle_room_response(response)
+            return await self.handle_room_response(response)
         else:
-            await self.handle_global_response(response)
+            return await self.handle_global_response(response)
     
     async def connect_with_timeout(self, ctx):
         if self.ws is not None: return
