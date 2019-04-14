@@ -9,11 +9,12 @@ import showdown_commands
 
 class Showdown:
 
-    def __init__(self, bot, id, pw, channel_id, timeout=3600, ai=False):
+    def __init__(self, bot, id, pw, channel_id, voice_id, timeout=3600, ai=False):
         self.bot = bot
         self.id = id
         self.pw = pw
         self.channel_id = channel_id
+        self.voice_id = voice_id
         self.timeout = timeout
         self.ai = ai
 
@@ -44,7 +45,7 @@ class Showdown:
             else:
                 self.timer = self.timeout - self.timer
         
-    async def login(self, r):
+    async def login(self, msg):
         login_msg = '|/trn ' + self.id + ',0,'
         
         async with aiohttp.ClientSession() as session:
@@ -53,7 +54,7 @@ class Showdown:
             data['act'] = 'login'
             data['name'] = self.id
             data['pass'] = self.pw
-            data['challstr'] = r[2] + '|' + r[3]
+            data['challstr'] = msg[2] + '|' + msg[3]
             
             #assume no errors here (bad idea); login fails if nametaken with bad password, or bad challstr
             async with session.post(url, data=data) as response:
@@ -63,8 +64,8 @@ class Showdown:
         await self.ws.send(login_msg)
         await self.ws.send('|/avatar 27')
         
-    async def handle_challenge(self, r):
-        dict = json.loads(r[2])
+    async def handle_challenge(self, msg):
+        dict = json.loads(msg[2])
         for user, format in dict['challengesFrom'].items():
             if user == 'psikh0':
                 await self.ws.send('|/utm ' + 'null')
@@ -83,28 +84,39 @@ class Showdown:
         r = response.split('\n')
         room_id = r[0][1:].rstrip()
         
-        for l in r[1:]:
-            line = l.split('|')
-            if len(line) <= 1: continue
+        for line in r[1:]:
+            msg = line.split('|')
+            if len(msg) <= 1: continue
             
-            #if response type is request, compile information and wait for user input ?
+            response_type = msg[1]
+            if response_type == 'init':
+                if msg[2] == 'battle':
+                    #only use this channel for now
+                    self.rooms[self.channel_id] = room_id
+                    self.channels[room_id] = self.channel_id
+                    pass
+                elif msg[2] == 'chat': pass
+            else:
+                pass
+            
         return
     
     async def handle_global_response(self, response):
         r = response.split('\n')  
-        for l in r:
-            line = l.split('|')
-            if len(line) <= 1: continue
+        for line in r:
+            msg = line.split('|')
+            if len(msg) <= 1: continue
             
-            response_type = line[1]
+            response_type = msg[1]
             if response_type == 'challstr':
-                await self.login(line) #TODO: if not logged in
+                await self.login(msg) #TODO: if not logged in
             elif response_type == 'updatechallenges':
-                await self.handle_challenge(line)
+                await self.handle_challenge(msg)
             elif response_type == 'updatesearch':
-                games = json.loads(line[2])['games']
+                #games = json.loads(msg[2])['games']
                 #games can just be a json 'null'
                 #bind room / channel
+                continue
             else:
                 continue
         return

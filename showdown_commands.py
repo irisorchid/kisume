@@ -26,20 +26,22 @@ def generate_showdown_commands(bot, showdown, ctx):
             room = showdown.rooms[ctx.channel.id]
             if room is None: return
             
-            args = message.lower().split(' ')
+            args = message.content.lower().split(' ')
             command = args[0][1:]
             target = args[1]
             
+            #TODO: only allow queue random for now
             if command == 'queue': return
             
             if command == 'switch':
                 return await showdown.choose(room, command, target)
             if command == 'move':
                 option = ''
-                if args[2] == 'mega':
-                    option = ' mega'
-                elif args[2] == 'zmove':
-                    option = ' zmove'
+                if len(args) > 2:
+                    if args[2] == 'mega':
+                        option = ' mega'
+                    elif args[2] == 'zmove':
+                        option = ' zmove'
                 return await showdown.choose(room, command, target, option)
             
     return showdown_commands

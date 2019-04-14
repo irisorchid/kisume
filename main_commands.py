@@ -30,6 +30,8 @@ def load_commands(bot, modules):
     async def test(ctx):
         print(ctx.message.content)
         print(ctx.channel)
+        print(ctx.guild.voice_channels)
+        print(ctx.bot.voice_clients)
         
     @bot.command(name='kusoge')
     async def quit(ctx):
@@ -38,6 +40,18 @@ def load_commands(bot, modules):
         #might want to sleep here
         await bot.logout()
         
+    @bot.command()
+    async def voice_connect(ctx):
+        voice_channel = ctx.guild.get_channel(modules[0].voice_id)
+        if ctx.voice_client is not None:
+            return await ctx.voice_client.move_to(voice_channel)
+        await voice_channel.connect()
+        
+    @bot.command()
+    async def voice_disconnect(ctx):
+        if ctx.voice_client is not None:
+            return await ctx.voice_client.disconnect()
+    
     """
     @bot.command(name='initiate_listener')
     async def blackmagic(ctx):

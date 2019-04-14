@@ -12,9 +12,10 @@ import main_commands
 load_dotenv(verbose=True)
 discord_token = os.getenv('discord_token')
 discord_channel_id = int(os.getenv('discord_channel_id'))
+voice_channel_id = int(os.getenv('discord_voice_channel_id'))
 
 bot = commands.Bot(command_prefix='!')
-instance = showdown.Showdown(bot, os.getenv('showdown_username'), os.getenv('showdown_password'), discord_channel_id)
+instance = showdown.Showdown(bot, os.getenv('showdown_username'), os.getenv('showdown_password'), discord_channel_id, voice_channel_id)
 
 modules = []
 modules.append(instance)
