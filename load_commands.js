@@ -1,8 +1,9 @@
 "use strict";
 
-const commands = function(bot, command_prefix) {
+const commands = function(bot, config) {
     
-    const command_list = require('./commands.js')(bot, command_prefix);
+    const command_list = require('./commands.js')(bot, config);
+    //TODO: showdown module here
     
     for (const command in command_list) {
         bot.commands.set(command_list[command].name, command_list[command].execute)
@@ -13,9 +14,9 @@ const commands = function(bot, command_prefix) {
     });
     
     bot.on('message', async (message) => {
-        if (!message.content.startsWith(command_prefix) || message.author.bot) { return; }
+        if (!message.content.startsWith(config.command_prefix) || message.author.bot) { return; }
         
-        const args = message.content.slice(command_prefix.length).split(/ +/);
+        const args = message.content.slice(config.command_prefix.length).split(/ +/);
         const commandName = args.shift().toLowerCase();
         
         if (!bot.commands.has(commandName)) { return; }
@@ -28,7 +29,6 @@ const commands = function(bot, command_prefix) {
         }
     });
     
-    return null;
 }
 
-module.exports = commands
+module.exports = commands;

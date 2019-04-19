@@ -8,7 +8,7 @@ const load_commands = require('./load_commands.js');
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 
-load_commands(bot, '!');
+load_commands(bot, config);
 
 bot.login(config.discord_token);
 

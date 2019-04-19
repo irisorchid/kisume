@@ -1,6 +1,6 @@
 "use strict";
 
-const command_list = function(bot, command_prefix) {
+const command_list = function(bot, config) {
     
     const hello = {
         name: 'hello',
@@ -12,7 +12,7 @@ const command_list = function(bot, command_prefix) {
     const echo = {
         name: 'echo',
         execute: async function(message, args) {
-            return message.channel.send(message.content.slice(command_prefix.length + 4).trim());
+            return message.channel.send(message.content.slice(config.command_prefix.length + 4).trim());
         },
     }
     
@@ -47,4 +47,4 @@ const command_list = function(bot, command_prefix) {
     }
 }
 
-module.exports = command_list
+module.exports = command_list;
