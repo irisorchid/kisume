@@ -3,12 +3,13 @@
 const Discord = require('discord.js');
 
 const config = require('./config.json');
-const load_commands = require('./load_commands.js');
+const setup = require('./setup.js');
 
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
+bot.command_modules = new Discord.Collection();
 
-load_commands(bot, config);
+setup(bot, config);
 
 bot.login(config.discord_token);
 

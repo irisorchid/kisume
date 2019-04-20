@@ -1,20 +1,50 @@
 "use strict";
 
+const axios = require('axios');
+const WebSocket = require('ws');
+
 const showdown = function(bot, config) {
     
     const showdown_init = {
         name: 'showdown',
-        execute: async function() {
+        execute: async function(message, args) {
             return;
         },
     };
+    //add this command to bot
     
     const run = async function() {
+
+        const url = 'wss://sim.smogon.com/showdown/websocket';
+        const ws = new WebSocket(url);
         
+        ws.on('open', function(){});
+        ws.on('error', function(){});
+        ws.on('close', function(){});
+        ws.on('message', function(){});
     };
     
     const generate_showdown_commands = function() {
         
+    };
+    
+    const login = async function() {
+        const login_msg = '|/trn ' + id + ',0,';
+        
+        const url = 'https://play.pokemonshowdown.com/action.php';
+        
+        const data = {};
+        data.act = 'login';
+        data.name = id;
+        data.pass = pw;
+        data.challstr = 'something'; //msg[2] + '|' + msg[3]
+        
+        const res = await axios.post(url, data);
+        const s = JSON.parse(res.data.slice(1));
+        login_msg += s.assertion;
+        
+        //ws.send (login_msg)
+        //ws.send('|/avatar 27');
     };
     
     //methods to implement:
@@ -34,7 +64,7 @@ const showdown = function(bot, config) {
         const f = null;
         
         bot.on('message', f);
-    }
+    };
     
     const remove_listener = function() {
         //TODO: implement
@@ -43,7 +73,7 @@ const showdown = function(bot, config) {
         
         bot.off('message', f);
         delete something;
-    }
+    };
 }
 
 module.exports = showdown;
