@@ -3,7 +3,7 @@
 const axios = require('axios');
 const WebSocket = require('ws');
 
-class ShowdownManager {
+class ShowdownInstance {
     
     constructor(bot, config) {
         this.ws = null;
@@ -14,128 +14,125 @@ class ShowdownManager {
         this.listeners = {}; //channel id : event_handler
         this.rooms = {}; // channel id: room
         this.channels = {}; // room : channel id
+        this.queue = {}; //on game search, place channel in queue, on game found, shift and assign channel to game room
     }
     
     choose(room, command, target, op='') {
         this.ws.send(room + '|/choose ' + command + ' ' + target + op);
     }
     
-    login() {
+    async login(msg) {
         const data = {};
         data.act = 'login';
-        data.name = id;
-        data.pass = pw;
+        data.name = this.name;
+        data.pass = this.pw;
         data.challstr = 'something'; //msg[2] + '|' + msg[3]
         
-        //assume post does not fail for now;
-        const res = await axios.post(ShowdownManager.action_url, data);
+        //assume post request does not fail for now;
+        const res = await axios.post(ShowdownInstance.action_url, data);
         const info = JSON.parse(res.data.slice(1));
         const login_msg = '|/trn ' + id + ',0,' + info.assertion;
         return;
-        //ws.send (login_msg)
-        //ws.send('|/avatar 27');
+        //this.ws.send (login_msg)
+        //this.ws.send('|/avatar 27');
+    }
+    
+    handle_room_response(msg) {
+        
+    }
+    
+    handle_global_response(msg) {
+        
     }
     
     handle_response(msg) {
         if (msg[0] === '>') {
-            
+            this.handle_room_response(msg);
         } else {
-            
+            this.handle_global_response(msg);
         }
     }
     
-    run() {
-        if (this.ws != null) { return; }
+    connect(channel) {
+        if (this.ws !== null) { return; }
         
-        this.ws = new WebSocket(ShowdownManager.url);
+        this.ws = new WebSocket(ShowdownInstance.url);
         
         this.ws.on('open', function(){
             console.log('connected to showdown!');
-            //load commmands here ?
         });
-        this.ws.on('error', function(error){ console.log('error'); });
+        this.ws.on('error', function(error){
+            console.log('ERROR');
+            this.cleanup(channel);
+        });
         this.ws.on('close', function(code, reason){
-            //do some cleanup stuff here?
-            //ws.terminate() forcibly closes socket not sure if this still gets called
+            console.log('CLOSE'); //ws.terminate() forcibly closes socket not sure if this still gets called
+            this.cleanup(channel);
         });
-        this.ws.on('message', function(data){
-            console.log(data);
-            //assert typeof data is string ?
-            //handleresponse data
+        this.ws.on('message', function(message){
+            console.log(message); //assert msg is string ?
+            this.handle_response(message)
         });
+    }
+    
+    run(channel) {
+        if (this.ws !== null) { return; } //temporary
         
+        if (this.ws === null) { this.connect(channel); }
+        this.add_listener(channel);
     }
     
     stop() {
         this.ws.terminate();
-        this.cleanup();
+        //this.cleanup(channel); //need this if terminate does not emit close
     }
     
-    cleanup() {
+    cleanup(channel) {
+        this.remove_listener(channel);
         this.ws = null;
+    }
+
+    generate_commands() { 
+        const commands = function(message) {
+            return;
+        };
+        return commands;
+    }
+    
+    add_listener(channel) {
+        if (channel.id in this.listeners) { return; }
+        const commands = generate_commands();
+        this.listeners[channel.id] = commands;
+        this.bot.on('message', commands);
+    }
+    
+    remove_listener(channel) {
+        const commands = this.listeners[channel.id];
+        if (commands === undefined) { return; }
+        this.bot.off('message', commands);
+        delete this.listeners[channel.id];
     }
 }
 
-ShowdownManager.url = 'wss://sim.smogon.com/showdown/websocket';
-ShowdownManager.action_url = 'https://play.pokemonshowdown.com/action.php';
+ShowdownInstance.url = 'wss://sim.smogon.com/showdown/websocket';
+ShowdownInstance.action_url = 'https://play.pokemonshowdown.com/action.php';
 
-const showdown = function(bot, config) {
+const showdown_commands = function(bot, config) {
     
-    const pokemon = new ShowdownManager();
+    const pokemon = new ShowdownInstance();
     
-    const showdown_command = {
+    const showdown = {
         name: 'showdown',
         execute: async function(message, args) {
-            //has access to showdown variable
+            //block calls except from config.discord_channel_id for now
+            if (message.channel.id !== config.discord_channel_id) { return; }
             return;
         },
     };
-    //add this command to bot
     
-    const generate_showdown_commands = function() {
-        
+    return {
+        showdown: showdown,
     };
-    
-    //methods to implement:
-    //load/deload showdown specific commands (either as listener or specific commands)
-    //handle response: -> split into room and global response
-    //close websocket?
-    
-    //TODO: add a property to bot that contains other module instances
-    //each module should have a listener that's attached to it module.listener ?
-    //use Map() for showdown commands?
-    
-    const add_listener = function() {
-        //TODO: implement
-        if (true) { return; }
-        const f = null;
-        
-        bot.on('message', f);
-    };
-    
-    const remove_listener = function() {
-        //TODO: implement
-        if (true) { return; }
-        const f = null;
-        
-        bot.off('message', f);
-        delete something;
-    };
-    
-    return {};
 }
 
-module.exports = showdown;
-
-/* python generate func skeleton
-def load_showdown_commands(bot, showdown, ctx):
-    if ctx.channel.id in showdown.listener: return
-    showdown_commands = generate_showdown_commands(bot, showdown, ctx)
-    showdown.listener[ctx.channel.id] = showdown_commands
-    bot.add_listener(showdown_commands, 'on_message')
-
-def unload_showdown_commands(bot, showdown, ctx):
-    showdown_commands = showdown.listener.pop(ctx.channel.id, None)
-    if showdown_commands is not None:
-        bot.remove_listener(showdown_commands, 'on_message')
-*/
+module.exports = showdown_commands;

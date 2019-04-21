@@ -4,21 +4,21 @@ const command_list = function(bot, config) {
     
     const hello = {
         name: 'hello',
-        execute: async function(message, args) {
+        execute: function(message, args) {
             return message.channel.send('Hello World!');
         },
     }
     
     const echo = {
         name: 'echo',
-        execute: async function(message, args) {
+        execute: function(message, args) {
             return message.channel.send(message.content.slice(config.command_prefix.length + 4).trim());
         },
     }
     
     const choose = {
         name: 'choose',
-        execute: async function(message, args) {
+        execute: function(message, args) {
             const choice = Math.floor(Math.random() * args.length);
             return message.channel.send(args[choice]);
         },
@@ -26,15 +26,16 @@ const command_list = function(bot, config) {
     
     const kusoge = {
         name: 'kusoge',
-        execute: async function(message, args) {
+        execute: function(message, args) {
             return bot.destroy();
         },
     }
     
     const unravel = {
         name: 'unravel',
-        execute: async function(message, args) {
-            return null;
+        execute: function(message, args) {
+            console.log(message.channel.id);
+            console.log(typeof message.channel.id);
         },
     }
     

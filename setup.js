@@ -18,11 +18,11 @@ const commands = function(bot, config) {
         load_commands(bot, module);
     }
     
-    bot.on('ready', async () => {
+    bot.on('ready', () => {
         console.log('bot is ready!');
     });
     
-    bot.on('message', async (message) => {
+    bot.on('message', (message) => {
         if (!message.content.startsWith(config.command_prefix) || message.author.bot) { return; }
         
         const args = message.content.slice(config.command_prefix.length).split(/ +/);
@@ -32,7 +32,7 @@ const commands = function(bot, config) {
         
         const command = bot.commands.get(commandName);
         try {
-            return await command(message, args);
+            return command(message, args);
         } finally {
             //do something
         }
