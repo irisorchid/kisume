@@ -8,18 +8,15 @@ const load_commands = function(bot, module) {
 
 const commands = function(bot, config) {
     
-    const command_list = require('./commands.js')(bot, config);
-    //TODO: showdown module here
-    //initialize modules?
+    const main = require('./commands.js');
+    //const showdown = require('./showdown.js');
+
+    bot.command_modules.set('main', main(bot, config));
+    //bot.command_modules.set('showdown', showdown(bot, config));
     
-    for (const command in command_list) {
-        bot.commands.set(command_list[command].name, command_list[command].execute)
+    for (const module of bot.command_modules.values()) {
+        load_commands(bot, module);
     }
-    
-    // design doc
-    // for (const v of bot.command_modules) {
-        // v.load_commands
-    // }
     
     bot.on('ready', async () => {
         console.log('bot is ready!');
