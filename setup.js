@@ -1,21 +1,21 @@
 "use strict";
 
-const load_commands = function(bot, module) {
-    for (const command in module) {
-        bot.commands.set(module[command].name, module[command].execute)
+const load_commands = function(bot, command_list) {
+    for (const command in command_list) {
+        bot.commands.set(command_list[command].name, command_list[command].execute)
     }
 }
 
 const commands = function(bot, config) {
     
-    const main = require('./commands.js');
-    //const showdown = require('./showdown.js');
+    const main = require('./commands.js')(bot, config);
+    const showdown = require('./showdown.js')(bot, config);
 
-    bot.command_modules.set('main', main(bot, config));
-    //bot.command_modules.set('showdown', showdown(bot, config));
+    bot.command_modules.set('main', main);
+    bot.command_modules.set('showdown', showdown);
     
     for (const module of bot.command_modules.values()) {
-        load_commands(bot, module);
+        load_commands(bot, module.command_list);
     }
     
     bot.on('ready', () => {

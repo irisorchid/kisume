@@ -1,6 +1,6 @@
 "use strict";
 
-const command_list = function(bot, config) {
+const main_commands = function(bot, config) {
     
     const hello = {
         name: 'hello',
@@ -27,6 +27,8 @@ const command_list = function(bot, config) {
     const kusoge = {
         name: 'kusoge',
         execute: function(message, args) {
+            //TODO: generalize this
+            bot.command_modules.get('showdown').stop();
             return bot.destroy();
         },
     }
@@ -39,13 +41,20 @@ const command_list = function(bot, config) {
         },
     }
     
-    return {
+    const command_list = {
         hello: hello,
         echo: echo,
         choose: choose,
         kusoge: kusoge,
         unravel: unravel,
-    }
+    };
+    
+    const stop = () => {};
+    
+    return {
+        command_list: command_list,
+        stop: stop,
+    };
 }
 
-module.exports = command_list;
+module.exports = main_commands;

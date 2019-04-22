@@ -21,17 +21,17 @@ class ShowdownInstance {
         this.ws.send(room + '|/choose ' + action + ' ' + target + op);
     }
     
-    async login(msg) {
+    async login(m) {
         const data = {};
         data.act = 'login';
         data.name = this.name;
         data.pass = this.pw;
-        data.challstr = 'something'; //msg[2] + '|' + msg[3]
+        data.challstr = m[2] + '|' + m[3];
         
         //assume post request does not fail for now;
         const res = await axios.post(ShowdownInstance.action_url, data);
         const info = JSON.parse(res.data.slice(1));
-        const login_msg = '|/trn ' + id + ',0,' + info.assertion;
+        const login_msg = '|/trn ' + this.name + ',0,' + info.assertion;
         this.ws.send (login_msg)
         this.ws.send('|/avatar 27');
     }
@@ -41,7 +41,17 @@ class ShowdownInstance {
     }
     
     handle_global_response(msg) {
+        const r = msg.split('\n');
         
+        for (const l of r) {
+            const m = l.split('|');
+            if (m.length <= 1) { continue; }
+            
+            const t = m[1];
+            if (t === 'challstr') {
+                this.login(m); //TODO: handle promise rejection?
+            }
+        }
     }
     
     handle_response(msg) {
@@ -57,18 +67,18 @@ class ShowdownInstance {
         
         this.ws = new WebSocket(ShowdownInstance.url);
         
-        this.ws.on('open', function(){
+        this.ws.on('open', () => {
             console.log('connected to showdown!');
         });
-        this.ws.on('error', function(error){
+        this.ws.on('error', (error) => {
             console.log('ERROR');
             this.cleanup(channel);
         });
-        this.ws.on('close', function(code, reason){
+        this.ws.on('close', (code, reason) => {
             console.log('CLOSE'); //ws.terminate() forcibly closes socket not sure if this still gets called
             this.cleanup(channel);
         });
-        this.ws.on('message', function(message){
+        this.ws.on('message', (message) => {
             console.log(message); //assert msg is string ?
             this.handle_response(message)
         });
@@ -92,7 +102,7 @@ class ShowdownInstance {
     }
 
     generate_commands(channel_id) { 
-        const commands = function(message) {
+        const commands = (message) => {
             if (message.channel.id !== channel_id) { return; }
             if (!message.content.startsWith('~') || message.author.bot) { return; }
             
@@ -117,7 +127,7 @@ class ShowdownInstance {
     
     add_listener(channel_id) {
         if (channel_id in this.listeners) { return; }
-        const commands = generate_commands(channel_id);
+        const commands = this.generate_commands(channel_id);
         this.listeners[channel_id] = commands;
         this.bot.on('message', commands);
     }
@@ -130,23 +140,32 @@ class ShowdownInstance {
     }
 }
 
-ShowdownInstance.url = 'wss://sim.smogon.com/showdown/websocket';
+ShowdownInstance.url = 'ws://sim.smogon.com:8000/showdown/websocket';
 ShowdownInstance.action_url = 'https://play.pokemonshowdown.com/action.php';
 
 const showdown_commands = function(bot, config) {
     
-    const pokemon = new ShowdownInstance();
+    const pokemon = new ShowdownInstance(bot, config);
     
     const showdown = {
         name: 'showdown',
-        execute: async function(message, args) {
+        execute: function(message, args) {
             if (message.channel.id !== config.discord_channel_id) { return; } //block calls from other channels for now
             pokemon.run(message.channel);
         },
     };
     
-    return {
+    const command_list = {
         showdown: showdown,
+    };
+    
+    const stop = () => {
+        pokemon.stop();
+    }
+    
+    return {
+        command_list: command_list,
+        stop: stop,
     };
 }
 
