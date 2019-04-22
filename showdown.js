@@ -17,8 +17,8 @@ class ShowdownInstance {
         this.queue = {}; //on game search, place channel in queue, on game found, shift and assign channel to game room
     }
     
-    choose(room, command, target, op='') {
-        this.ws.send(room + '|/choose ' + command + ' ' + target + op);
+    choose(room, action, target, op='') {
+        this.ws.send(room + '|/choose ' + action + ' ' + target + op);
     }
     
     async login(msg) {
@@ -32,9 +32,8 @@ class ShowdownInstance {
         const res = await axios.post(ShowdownInstance.action_url, data);
         const info = JSON.parse(res.data.slice(1));
         const login_msg = '|/trn ' + id + ',0,' + info.assertion;
-        return;
-        //this.ws.send (login_msg)
-        //this.ws.send('|/avatar 27');
+        this.ws.send (login_msg)
+        this.ws.send('|/avatar 27');
     }
     
     handle_room_response(msg) {
@@ -79,7 +78,7 @@ class ShowdownInstance {
         if (this.ws !== null) { return; } //temporary
         
         if (this.ws === null) { this.connect(channel); }
-        this.add_listener(channel);
+        this.add_listener(channel.id);
     }
     
     stop() {
@@ -88,29 +87,46 @@ class ShowdownInstance {
     }
     
     cleanup(channel) {
-        this.remove_listener(channel);
+        this.remove_listener(channel.id);
         this.ws = null;
     }
 
-    generate_commands() { 
+    generate_commands(channel_id) { 
         const commands = function(message) {
-            return;
+            if (message.channel.id !== channel_id) { return; }
+            if (!message.content.startsWith('~') || message.author.bot) { return; }
+            
+            const args = message.content.slice(1).toLowerCase().split(/ +/);
+            const action = args.shift();
+            
+            const room = this.rooms[channel_id];
+            if (room === undefined) { return; } //unless command is to queue
+            
+            if (args.length < 1) { return; }
+            const target = args[0];
+            if (action === 'switch') {
+                return this.choose(room, action, target);
+            }
+            if (action === 'move') {
+                const op = (args[1] === 'mega' || args[1] === 'zmove') ? ' ' + args[1] :'';
+                return this.choose(room, action, target, op);
+            }
         };
         return commands;
     }
     
-    add_listener(channel) {
-        if (channel.id in this.listeners) { return; }
-        const commands = generate_commands();
-        this.listeners[channel.id] = commands;
+    add_listener(channel_id) {
+        if (channel_id in this.listeners) { return; }
+        const commands = generate_commands(channel_id);
+        this.listeners[channel_id] = commands;
         this.bot.on('message', commands);
     }
     
-    remove_listener(channel) {
-        const commands = this.listeners[channel.id];
+    remove_listener(channel_id) {
+        const commands = this.listeners[channel_id];
         if (commands === undefined) { return; }
         this.bot.off('message', commands);
-        delete this.listeners[channel.id];
+        delete this.listeners[channel_id];
     }
 }
 
@@ -124,9 +140,8 @@ const showdown_commands = function(bot, config) {
     const showdown = {
         name: 'showdown',
         execute: async function(message, args) {
-            //block calls except from config.discord_channel_id for now
-            if (message.channel.id !== config.discord_channel_id) { return; }
-            return;
+            if (message.channel.id !== config.discord_channel_id) { return; } //block calls from other channels for now
+            pokemon.run(message.channel);
         },
     };
     
