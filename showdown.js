@@ -15,6 +15,8 @@ class ShowdownInstance {
         this.rooms = {}; // channel id: room
         this.channels = {}; // room : channel id
         this.queue = {}; //on game search, place channel in queue, on game found, shift and assign channel to game room
+        
+        this.channel_id = config.discord_channel_id; //temp
     }
     
     choose(room, action, target, op='') {
@@ -45,7 +47,12 @@ class ShowdownInstance {
             if (r.length <= 1) { continue; }
             
             const type = r[1];
-            
+            if (type === 'init') {
+                if (r[2] === 'battle') {
+                    this.rooms[this.channel_id] = room;
+                    this.channels[room] = this.channel_id;
+                }
+            }
         }
     }
     
@@ -59,11 +66,11 @@ class ShowdownInstance {
             const type = r[1];
             if (type === 'challstr') {
                 this.login(r); //TODO: handle promise rejection?
-            } else if (t === 'updatechallenges') {
+            } else if (type === 'updatechallenges') {
                 //for testing purposes
                 const d = JSON.parse(r[2]);
-                for (const u in d['challengesFrom']) {
-                    if (u === 'psikh0') {
+                for (const user in d['challengesFrom']) {
+                    if (user === 'psikh0') {
                         this.ws.send('|/utm ' + 'null');
                         this.ws.send('|/accept pSikh0');
                     }
