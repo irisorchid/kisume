@@ -21,12 +21,12 @@ class ShowdownInstance {
         this.ws.send(room + '|/choose ' + action + ' ' + target + op);
     }
     
-    async login(m) {
+    async login(r) {
         const data = {};
         data.act = 'login';
         data.name = this.name;
         data.pass = this.pw;
-        data.challstr = m[2] + '|' + m[3];
+        data.challstr = r[2] + '|' + r[3];
         
         //assume post request does not fail for now;
         const res = await axios.post(ShowdownInstance.action_url, data);
@@ -36,24 +36,32 @@ class ShowdownInstance {
         this.ws.send('|/avatar 27');
     }
     
-    handle_room_response(msg) {
+    handle_room_response(message) {
+        const response = message.split('\n');
+        const room = response.shift().slice(1).trim();
         
+        for (const line of response) {
+            const r = line.split('|');
+            if (r.length <= 1) { continue; }
+            
+            const type = r[1];
+            
+        }
     }
     
-    handle_global_response(msg) {
-        //TODO: cleanup variable names
-        const r = msg.split('\n');
+    handle_global_response(message) {
+        const response = message.split('\n');
         
-        for (const l of r) {
-            const m = l.split('|');
-            if (m.length <= 1) { continue; }
+        for (const line of response) {
+            const r = line.split('|');
+            if (r.length <= 1) { continue; }
             
-            const t = m[1];
-            if (t === 'challstr') {
-                this.login(m); //TODO: handle promise rejection?
+            const type = r[1];
+            if (type === 'challstr') {
+                this.login(r); //TODO: handle promise rejection?
             } else if (t === 'updatechallenges') {
                 //for testing purposes
-                const d = JSON.parse(m[2]);
+                const d = JSON.parse(r[2]);
                 for (const u in d['challengesFrom']) {
                     if (u === 'psikh0') {
                         this.ws.send('|/utm ' + 'null');
@@ -64,11 +72,11 @@ class ShowdownInstance {
         }
     }
     
-    handle_response(msg) {
-        if (msg[0] === '>') {
-            this.handle_room_response(msg);
+    handle_response(message) {
+        if (message[0] === '>') {
+            this.handle_room_response(message);
         } else {
-            this.handle_global_response(msg);
+            this.handle_global_response(message);
         }
     }
     
