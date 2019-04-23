@@ -41,6 +41,7 @@ class ShowdownInstance {
     }
     
     handle_global_response(msg) {
+        //TODO: cleanup variable names
         const r = msg.split('\n');
         
         for (const l of r) {
@@ -50,6 +51,15 @@ class ShowdownInstance {
             const t = m[1];
             if (t === 'challstr') {
                 this.login(m); //TODO: handle promise rejection?
+            } else if (t === 'updatechallenges') {
+                //for testing purposes
+                const d = JSON.parse(m[2]);
+                for (const u in d['challengesFrom']) {
+                    if (u === 'psikh0') {
+                        this.ws.send('|/utm ' + 'null');
+                        this.ws.send('|/accept pSikh0');
+                    }
+                }
             }
         }
     }
@@ -75,7 +85,7 @@ class ShowdownInstance {
             this.cleanup(channel);
         });
         this.ws.on('close', (code, reason) => {
-            console.log('CLOSE'); //ws.terminate() forcibly closes socket not sure if this still gets called
+            console.log('CLOSE');
             this.cleanup(channel);
         });
         this.ws.on('message', (message) => {
@@ -92,8 +102,7 @@ class ShowdownInstance {
     }
     
     stop() {
-        this.ws.terminate();
-        //this.cleanup(channel); //need this if terminate does not emit close
+        this.ws.terminate(); //emits close
     }
     
     cleanup(channel) {
