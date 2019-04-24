@@ -48,6 +48,7 @@ class ShowdownInstance {
             
             const type = r[1];
             if (type === 'init') {
+                //temp
                 if (r[2] === 'battle') {
                     this.rooms[this.channel_id] = room;
                     this.channels[room] = this.channel_id;
