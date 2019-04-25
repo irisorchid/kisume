@@ -55,6 +55,6 @@ const main_commands = function(bot, config) {
         command_list: command_list,
         stop: stop,
     };
-}
+};
 
 module.exports = main_commands;

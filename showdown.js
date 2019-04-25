@@ -118,6 +118,7 @@ class ShowdownInstance {
     }
     
     stop() {
+        if (this.ws === null) { return; }
         this.ws.terminate(); //emits close
     }
     
@@ -131,7 +132,7 @@ class ShowdownInstance {
             if (message.channel.id !== channel_id) { return; }
             if (!message.content.startsWith('~') || message.author.bot) { return; }
             
-            const args = message.content.slice(1).toLowerCase().split(/ +/);
+            const args = message.content.slice(1).toLowerCase().split(/\s+/);
             const action = args.shift();
             
             const room = this.rooms[channel_id];
@@ -192,6 +193,6 @@ const showdown_commands = function(bot, config) {
         command_list: command_list,
         stop: stop,
     };
-}
+};
 
 module.exports = showdown_commands;
