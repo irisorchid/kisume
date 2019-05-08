@@ -187,7 +187,7 @@ const showdown_commands = function(bot, config) {
     
     const stop = () => {
         pokemon.stop();
-    }
+    };
     
     return {
         command_list: command_list,
